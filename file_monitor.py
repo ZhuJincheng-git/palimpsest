@@ -12,7 +12,8 @@ class FileMonitor:
     def __init__(self, directory="data/", metadata_file="metadata.json"):
         self.directory = Path(directory)
         self.metadata_file = self.directory / metadata_file
-        self.supported_extensions = {'.txt', '.json', '.csv', '.xml', '.md', '.py', '.js', '.html', '.css', '.jpg', '.png', '.gif', '.pdf', '.doc', '.docx', '.xls', '.xlsx'}
+                # 支持所有文件格式
+        self.supported_extensions = None
     
     CHUNK_SIZE = 1024 * 1024  # 1MB分块：/mnt/e等网络文件系统上大幅减少系统调用
 
@@ -60,6 +61,7 @@ class FileMonitor:
             for file in files:
                 file_path = Path(root) / file
                 if file_path.name != self.metadata_file.name:
+                    # 支持所有文件格式，不再检查扩展名
                     file_meta = self.get_file_metadata(file_path)
                     if file_meta:
                         metadata['files'].append(file_meta)
