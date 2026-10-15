@@ -1,29 +1,40 @@
-# Palimpsest MCP Server 完整配置
+# Palimpsest MCP Server
 
-## 概述
+高性能、简洁、高质量的MCP (Model Context Protocol) 服务器，支持通过AI模型访问data/内的文件，支持文件树查询和全文搜索。
 
-Palimpsest MCP Server 是一个符合 Model Context Protocol (MCP) 标准的服务器，专门为AI模型提供文件系统访问能力。它支持文件树查询、文件读取、文件搜索等功能，特别适合用于AI对用户个人数据的分析。
+## 特性
 
-## 核心功能
+- 🚀 **高性能**: 使用异步I/O，支持高并发
+- 📁 **文件树查询**: 支持多层递归的文件树结构查询
+- 🔍 **强大搜索**: 支持全文搜索，模糊匹配
+- 📊 **元数据支持**: 自动读取和缓存文件元数据
+- 🌐 **MCP标准**: 符合Model Context Protocol规范
+- 🔧 **简洁设计**: 代码简洁，易于维护
+- 🛡️ **安全访问**: 文件访问限制在data/目录内
 
-### 📁 文件树查询
-- 支持多层递归的文件树结构查询
-- 可指定最大递归深度，防止无限递归
-- 自动跳过隐藏文件（以`.`开头的文件）
+## 快速开始
 
-### 📄 文件操作
-- **文件读取**: 支持文本和二进制文件读取
-- **文件信息**: 获取文件的元数据信息（大小、修改时间、创建时间等）
-- **文件列表**: 支持递归或非递归的文件列表获取
+### 1. 安装依赖
 
-### 🔍 搜索功能
-- 支持关键词搜索
-- 可指定搜索路径和限制结果数量
-- 搜索结果包含文件路径、名称、大小和修改时间
+```bash
+pip install -r requirements.txt
+```
 
-### 📊 系统信息
-- 获取系统元数据（总文件数、总大小等）
-- 元数据缓存机制，提高性能
+### 2. 启动服务器
+
+```bash
+python start.py
+```
+
+### 3. 测试服务器
+
+```bash
+python test_mcp.py
+```
+
+### 4. 配置AI客户端
+
+参考 `MCP_CONFIG_EXAMPLES.md` 文件，配置支持MCP的AI客户端。
 
 ## MCP工具列表
 
@@ -66,54 +77,14 @@ Palimpsest MCP Server 是一个符合 Model Context Protocol (MCP) 标准的服�
 - **参数**: 无
 - **返回**: 系统统计信息
 
-## 安装和配置
-
-### 1. 环境要求
-- Python 3.8+
-- MCP 依赖包
-
-### 2. 安装依赖
-```bash
-pip install mcp
-```
-
-### 3. 启动服务器
-```bash
-python simple_mcp.py
-```
-
-### 4. 测试服务器
-```bash
-python simple_test.py
-```
-
 ## 使用示例
 
-### 在AI客户端中配置
-
-#### Claude Desktop配置
-在 `claude_desktop_config.json` 中添加：
-```json
-{
-  "mcpServers": {
-    "palimpsest": {
-      "command": "python",
-      "args": ["/path/to/palimpsest/simple_mcp.py"],
-      "env": {}
-    }
-  }
-}
-```
-
-#### 其他支持MCP的客户端
-参考相应客户端的MCP配置文档
-
-### 命令行测试示例
+### Python 客户端示例
 
 ```python
 import asyncio
 import json
-from simple_mcp import PalimpsestMCPServer
+from mcp_server import PalimpsestMCPServer
 
 async def example_usage():
     server = PalimpsestMCPServer(Path("data"))
@@ -132,6 +103,34 @@ async def example_usage():
     print("文件内容预览:", content[:200] + "...")
 
 asyncio.run(example_usage())
+```
+
+### 命令行测试
+
+```bash
+# 测试文件树查询
+python -c "
+import asyncio
+from mcp_server import PalimpsestMCPServer
+async def test():
+    s = PalimpsestMCPServer(Path('data'))
+    await s.initialize()
+    tree = await s.get_file_tree('', max_depth=2)
+    print('文件树:', json.dumps(tree, indent=2, ensure_ascii=False))
+asyncio.run(test())
+"
+
+# 测试文件搜索
+python -c "
+import asyncio
+from mcp_server import PalimpsestMCPServer
+async def test():
+    s = PalimpsestMCPServer(Path('data'))
+    await s.initialize()
+    results = await s.search_files('README', limit=5)
+    print('搜索结果:', json.dumps(results, indent=2, ensure_ascii=False))
+asyncio.run(test())
+"
 ```
 
 ## 安全特性
@@ -156,39 +155,6 @@ asyncio.run(example_usage())
 - **异步I/O**: 所有文件操作都是异步的，提高并发性能
 - **流式处理**: 大文件采用流式处理，避免内存溢出
 
-## API接口说明
-
-### 请求格式
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "read_file",
-    "arguments": {
-      "file_path": "README.md"
-    }
-  }
-}
-```
-
-### 响应格式
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "文件内容..."
-      }
-    ]
-  }
-}
-```
-
 ## 故障排除
 
 ### 常见问题
@@ -210,8 +176,13 @@ asyncio.run(example_usage())
 设置环境变量启用调试日志：
 ```bash
 export MCP_DEBUG=1
-python simple_mcp.py
+python mcp_server.py
 ```
+
+## 文档
+
+- [MCP配置示例](MCP_CONFIG_EXAMPLES.md) - 详细的客户端配置示例
+- [完整文档](MCP_COMPLETE_README.md) - 完整的技术文档和API说明
 
 ## 更新日志
 

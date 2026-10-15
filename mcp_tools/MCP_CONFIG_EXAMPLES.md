@@ -9,7 +9,7 @@
   "mcpServers": {
     "palimpsest": {
       "command": "python",
-      "args": ["/path/to/palimpsest/simple_mcp.py"],
+      "args": ["/path/to/palimpsest/mcp_server.py"],
       "env": {
         "PYTHONPATH": "/path/to/palimpsest"
       }
@@ -27,7 +27,7 @@
   "name": "Palimpsest File System",
   "server": {
     "command": "python",
-    "args": ["/path/to/palimpsest/simple_mcp.py"],
+    "args": ["/path/to/palimpsest/mcp_server.py"],
     "env": {
       "PYTHONPATH": "/path/to/palimpsest"
     }
@@ -70,7 +70,7 @@
   "mcp.servers": {
     "palimpsest": {
       "command": "python",
-      "args": ["/path/to/palimpsest/simple_mcp.py"],
+      "args": ["/path/to/palimpsest/mcp_server.py"],
       "env": {
         "PYTHONPATH": "/path/to/palimpsest"
       }
@@ -85,19 +85,19 @@
 
 ```bash
 # 初始化服务器
-echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}' | python simple_mcp.py
+echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}' | python mcp_server.py
 
 # 获取工具列表
-echo '{"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}' | python simple_mcp.py
+echo '{"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}' | python mcp_server.py
 
 # 读取文件
-echo '{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "read_file", "arguments": {"file_path": "README.md"}}}' | python simple_mcp.py
+echo '{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "read_file", "arguments": {"file_path": "README.md"}}}' | python mcp_server.py
 
 # 获取文件树
-echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "get_file_tree", "arguments": {"path": "", "max_depth": 2}}}' | python simple_mcp.py
+echo '{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "get_file_tree", "arguments": {"path": "", "max_depth": 2}}}' | python mcp_server.py
 
 # 搜索文件
-echo '{"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "search_files", "arguments": {"query": "README", "limit": 10}}}' | python simple_mcp.py
+echo '{"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "search_files", "arguments": {"query": "README", "limit": 10}}}' | python mcp_server.py
 ```
 
 ## Python 客户端示例
@@ -142,7 +142,7 @@ class MCPClient:
         return response.get("result", {})
 
 async def main():
-    client = MCPClient("simple_mcp.py")
+    client = MCPClient("mcp_server.py")
     
     # 初始化
     await client.call_tool("initialize")
@@ -198,7 +198,7 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "simple_mcp.py"]
+CMD ["python", "mcp_server.py"]
 ```
 
 然后运行：
